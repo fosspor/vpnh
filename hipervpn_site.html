@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HiperVPN — Защита. Скорость. Приватность.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Clash+Display:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===================== RESET & ROOT ===================== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  background: #080c14;
+  color: #e8eaf2;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-weight: 400;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+:root {
+  --bg:        #080c14;
+  --bg1:       #0c1120;
+  --bg2:       #101828;
+  --surface:   #131c2e;
+  --surface2:  #1a2540;
+  --border:    rgba(255,255,255,0.07);
+  --border2:   rgba(255,255,255,0.12);
+
+  --blue:      #3b82f6;
+  --blue-d:    #2563eb;
+  --blue-l:    #60a5fa;
+  --cyan:      #22d3ee;
+  --cyan-d:    #0891b2;
+  --green:     #10b981;
+  --white:     #f0f4ff;
+  --muted:     #6b7a99;
+  --muted2:    #8b9ab8;
+
+  --radius:    12px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+}
+
+/* ===================== TYPOGRAPHY ===================== */
+h1,h2,h3,h4 {
+  font-family: 'Clash Display', 'DM Sans', sans-serif;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--white);
+}
+h1 { font-size: clamp(40px, 6vw, 76px); font-weight: 700; letter-spacing: -0.03em; }
+h2 { font-size: clamp(28px, 4vw, 48px); }
+h3 { font-size: clamp(18px, 2.5vw, 24px); }
+p { color: var(--muted2); font-weight: 300; }
+
+/* ===================== UTILITIES ===================== */
+.container { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+.tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--cyan); background: rgba(34,211,238,0.08);
+  border: 1px solid rgba(34,211,238,0.18);
+  padding: 6px 14px; border-radius: 100px;
+  margin-bottom: 24px;
+}
+.tag::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--cyan); flex-shrink:0; }
+.section { padding: 120px 0; }
+.section-sm { padding: 80px 0; }
+.divider { height: 1px; background: var(--border); }
+
+/* gradient text */
+.g-blue { background: linear-gradient(135deg, var(--white) 0%, var(--blue-l) 50%, var(--cyan) 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.g-speed { background: linear-gradient(135deg, var(--cyan) 0%, var(--green) 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+
+/* ===================== BUTTONS ===================== */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500;
+  padding: 14px 28px; border-radius: var(--radius); cursor: pointer;
+  text-decoration: none; transition: all .2s; border: none;
+  white-space: nowrap;
+}
+.btn-primary {
+  background: var(--blue);
+  color: #fff;
+  box-shadow: 0 0 0 0 rgba(59,130,246,0);
+}
+.btn-primary:hover { background: var(--blue-d); transform: translateY(-1px); box-shadow: 0 8px 32px rgba(59,130,246,0.4); }
+.btn-cyan { background: linear-gradient(135deg, var(--cyan-d), var(--cyan)); color: #0a1a22; font-weight: 600; }
+.btn-cyan:hover { transform: translateY(-1px); box-shadow: 0 8px 32px rgba(34,211,238,0.35); }
+.btn-outline {
+  background: transparent; color: var(--white);
+  border: 1px solid var(--border2);
+}
+.btn-outline:hover { border-color: rgba(255,255,255,0.25); background: rgba(255,255,255,0.04); }
+.btn-lg { padding: 17px 36px; font-size: 16px; border-radius: 14px; }
+.btn-sm { padding: 10px 20px; font-size: 13px; }
+
+/* ===================== NAV ===================== */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  padding: 0 24px;
+  background: rgba(8,12,20,0.8);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-inner {
+  max-width: 1160px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 64px;
+}
+.nav-logo { font-family: 'Clash Display', sans-serif; font-size: 20px; font-weight: 700; color: var(--white); text-decoration: none; }
+.nav-logo span { color: var(--cyan); }
+.nav-links { display: flex; gap: 32px; list-style: none; }
+.nav-links a { color: var(--muted2); text-decoration: none; font-size: 14px; font-weight: 400; transition: color .2s; }
+.nav-links a:hover { color: var(--white); }
+.nav-actions { display: flex; gap: 10px; align-items: center; }
+.hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 8px; }
+.hamburger span { width: 22px; height: 1.5px; background: var(--white); border-radius: 2px; transition: all .2s; }
+
+/* ===================== HERO ===================== */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 120px 24px 80px;
+  position: relative; overflow: hidden;
+}
+
+/* SVG network bg */
+.hero-bg {
+  position: absolute; inset: 0; pointer-events: none; overflow: hidden;
+}
+.hero-bg svg { width: 100%; height: 100%; opacity: 0.35; }
+
+/* grid lines */
+.hero-grid {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(59,130,246,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59,130,246,0.05) 1px, transparent 1px);
+  background-size: 80px 80px;
+}
+
+.hero-content { position: relative; z-index: 2; max-width: 860px; }
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-size: 13px; font-weight: 400; color: var(--muted2);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  padding: 8px 20px; border-radius: 100px;
+  margin-bottom: 36px;
+}
+.hero-eyebrow strong { color: var(--green); font-weight: 500; }
+.hero-eyebrow .dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.4)} }
+
+.hero h1 { margin-bottom: 24px; }
+.hero-sub { font-size: 18px; font-weight: 300; color: var(--muted2); max-width: 560px; margin: 0 auto 48px; line-height: 1.75; }
+.hero-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-bottom: 72px; }
+
+.hero-metrics {
+  display: flex; gap: 0; flex-wrap: wrap; justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: rgba(255,255,255,0.02);
+  backdrop-filter: blur(10px);
+}
+.metric {
+  padding: 24px 40px; text-align: center; flex: 1; min-width: 140px;
+  border-right: 1px solid var(--border);
+}
+.metric:last-child { border-right: none; }
+.metric-num { font-family: 'Clash Display', sans-serif; font-size: 32px; font-weight: 700; color: var(--white); }
+.metric-label { font-size: 12px; color: var(--muted); margin-top: 4px; letter-spacing: 0.06em; }
+
+/* ===================== ABOUT ===================== */
+.about-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
+}
+.about-visual {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 48px;
+  overflow: hidden;
+}
+.about-visual::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+}
+.shield-wrap {
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 32px;
+}
+.shield {
+  width: 120px; height: 120px;
+  background: radial-gradient(circle at 40% 40%, rgba(34,211,238,0.2), rgba(59,130,246,0.1));
+  border: 1px solid rgba(34,211,238,0.3);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+}
+.shield::after {
+  content: '';
+  position: absolute; inset: -12px;
+  border-radius: 50%;
+  border: 1px solid rgba(34,211,238,0.1);
+}
+.shield svg { width: 56px; height: 56px; }
+.status-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px;
+  background: rgba(16,24,40,0.8);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+.status-row .label { color: var(--muted); }
+.status-row .value { color: var(--white); font-weight: 500; }
+.status-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; }
+.status-badge.green { color: var(--green); }
+.status-badge.green::before { content:''; width:6px;height:6px;border-radius:50%;background:var(--green); }
+.status-badge.cyan { color: var(--cyan); }
+.status-badge.cyan::before { content:''; width:6px;height:6px;border-radius:50%;background:var(--cyan); }
+
+.about-text .section-lead { font-size: 17px; line-height: 1.75; margin-bottom: 32px; color: var(--muted2); }
+.check-list { list-style: none; display: flex; flex-direction: column; gap: 16px; }
+.check-list li {
+  display: flex; align-items: flex-start; gap: 14px;
+  font-size: 15px; color: var(--muted2); font-weight: 300;
+}
+.check-icon {
+  width: 22px; height: 22px; border-radius: 6px;
+  background: rgba(16,185,129,0.12);
+  border: 1px solid rgba(16,185,129,0.25);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px;
+}
+.check-icon svg { width: 12px; height: 12px; }
+
+/* ===================== HOW IT WORKS ===================== */
+.how-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  margin-top: 64px;
+}
+.step-card {
+  background: var(--bg1);
+  padding: 40px 32px;
+  position: relative;
+  transition: background .2s;
+}
+.step-card:hover { background: var(--surface); }
+.step-num {
+  font-family: 'Clash Display', sans-serif;
+  font-size: 56px; font-weight: 700;
+  color: rgba(59,130,246,0.12);
+  line-height: 1; margin-bottom: 20px;
+  letter-spacing: -0.04em;
+}
+.step-card h3 { font-size: 17px; margin-bottom: 12px; }
+.step-card p { font-size: 14px; line-height: 1.65; }
+.step-icon {
+  width: 44px; height: 44px;
+  background: rgba(59,130,246,0.1);
+  border: 1px solid rgba(59,130,246,0.2);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 20px;
+}
+.step-icon svg { width: 22px; height: 22px; }
+
+/* ===================== ADVANTAGES ===================== */
+.adv-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+  margin-top: 64px;
+}
+.adv-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 36px 28px;
+  transition: border-color .25s, transform .25s;
+  position: relative; overflow: hidden;
+}
+.adv-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(59,130,246,0.4), transparent);
+  opacity: 0; transition: opacity .25s;
+}
+.adv-card:hover { border-color: rgba(59,130,246,0.3); transform: translateY(-3px); }
+.adv-card:hover::before { opacity: 1; }
+.adv-card .icon {
+  width: 52px; height: 52px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 24px;
+  font-size: 24px;
+}
+.adv-card h3 { font-size: 18px; margin-bottom: 10px; }
+.adv-card p { font-size: 14px; line-height: 1.7; }
+
+/* ===================== DIRECTIONS (2 TIERS) ===================== */
+.dir-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+  margin-top: 64px;
+}
+.dir-card {
+  border-radius: var(--radius-xl);
+  padding: 52px 44px;
+  position: relative; overflow: hidden;
+}
+.dir-card.whitelist {
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.dir-card.mainchannel {
+  background: linear-gradient(145deg, #0d1a35 0%, #0a1428 50%, #0d1a35 100%);
+  border: 1px solid rgba(34,211,238,0.2);
+}
+.dir-card.mainchannel::after {
+  content: '';
+  position: absolute; top: -60px; right: -60px;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(34,211,238,0.12), transparent 70%);
+}
+.dir-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 5px 14px; border-radius: 100px; margin-bottom: 32px;
+}
+.dir-badge.wb { background: rgba(107,122,153,0.15); color: var(--muted2); border: 1px solid var(--border); }
+.dir-badge.mb { background: rgba(34,211,238,0.1); color: var(--cyan); border: 1px solid rgba(34,211,238,0.25); }
+.dir-badge::before { content:''; width:6px;height:6px;border-radius:50%; }
+.dir-badge.wb::before { background: var(--muted2); }
+.dir-badge.mb::before { background: var(--cyan); animation: pulse 2s infinite; }
+.dir-speed {
+  font-family: 'Clash Display', sans-serif;
+  font-size: clamp(52px, 7vw, 88px);
+  font-weight: 700; letter-spacing: -0.04em;
+  line-height: 1; margin-bottom: 8px;
+}
+.dir-speed-label { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 28px; }
+.dir-card h3 { font-size: 22px; margin-bottom: 14px; }
+.dir-card p { font-size: 15px; line-height: 1.75; margin-bottom: 36px; }
+.dir-features { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-bottom: 40px; }
+.dir-features li { font-size: 14px; color: var(--muted2); display: flex; align-items: center; gap: 10px; }
+.dir-features li::before {
+  content: ''; width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0;
+  background-size: 9px; background-repeat: no-repeat; background-position: center;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath stroke='%2310b981' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round' d='M2 6l3 3 5-5'/%3E%3C/svg%3E");
+  background-color: rgba(16,185,129,0.1);
+  border: 1px solid rgba(16,185,129,0.2);
+}
+.dir-card.mainchannel .dir-features li::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath stroke='%2322d3ee' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round' d='M2 6l3 3 5-5'/%3E%3C/svg%3E");
+  background-color: rgba(34,211,238,0.1);
+  border: 1px solid rgba(34,211,238,0.2);
+}
+
+/* ===================== BOT BLOCK ===================== */
+.bot-section {
+  background: var(--bg1);
+}
+.bot-inner {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
+}
+.bot-text .tag { --cyan: #22d3ee; }
+.bot-text h2 { margin-bottom: 20px; }
+.bot-text p { font-size: 16px; line-height: 1.8; margin-bottom: 40px; }
+.bot-steps { display: flex; flex-direction: column; gap: 20px; margin-bottom: 40px; }
+.bot-step {
+  display: flex; align-items: flex-start; gap: 18px;
+}
+.bot-step-num {
+  width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+  background: rgba(59,130,246,0.12);
+  border: 1px solid rgba(59,130,246,0.25);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Clash Display', sans-serif; font-size: 14px; font-weight: 600; color: var(--blue-l);
+}
+.bot-step-text h4 { font-size: 15px; font-family: 'DM Sans', sans-serif; font-weight: 500; color: var(--white); margin-bottom: 4px; }
+.bot-step-text p { font-size: 14px; color: var(--muted); margin: 0; }
+
+/* telegram mockup */
+.tg-mockup {
+  background: #17212b;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+}
+.tg-header {
+  background: #242f3d;
+  padding: 16px 20px;
+  display: flex; align-items: center; gap: 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.tg-avatar {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue), var(--cyan));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+.tg-name { font-size: 15px; font-weight: 500; color: #fff; }
+.tg-status { font-size: 12px; color: var(--green); }
+.tg-body { padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+.tg-msg {
+  padding: 12px 16px; border-radius: 12px;
+  font-size: 14px; line-height: 1.55; max-width: 85%;
+}
+.tg-msg.bot {
+  background: #2b5278;
+  color: #e8f4ff;
+  border-radius: 12px 12px 12px 4px;
+  align-self: flex-start;
+}
+.tg-msg.user {
+  background: #182533;
+  color: #d1dde8;
+  border-radius: 12px 12px 4px 12px;
+  align-self: flex-end; text-align: right;
+}
+.tg-msg .time { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 4px; }
+.tg-btns { display: flex; flex-direction: column; gap: 8px; padding: 0 20px 20px; }
+.tg-btn {
+  background: #2b5278;
+  color: #69b3e7; font-size: 14px; font-weight: 400;
+  padding: 11px 20px; border-radius: 10px; text-align: center;
+  border: 1px solid rgba(105,179,231,0.15);
+}
+
+/* ===================== PLANS ===================== */
+.plans-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+  margin-top: 64px;
+}
+.plan-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 40px 32px;
+  position: relative;
+  transition: border-color .2s;
+}
+.plan-card.featured {
+  background: linear-gradient(145deg, #0d1a35, #0c1828);
+  border-color: rgba(34,211,238,0.3);
+}
+.plan-card.featured::before {
+  content: '';
+  position: absolute; inset: -1px; border-radius: var(--radius-xl);
+  background: linear-gradient(135deg, rgba(34,211,238,0.3), rgba(59,130,246,0.3), transparent 60%);
+  z-index: -1;
+}
+.featured-label {
+  position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+  background: linear-gradient(135deg, var(--cyan-d), var(--cyan));
+  color: #0a1a22; font-size: 11px; font-weight: 600;
+  padding: 4px 18px; border-radius: 100px; white-space: nowrap;
+  letter-spacing: 0.08em; text-transform: uppercase;
+}
+.plan-tier { font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.plan-name { font-family: 'Clash Display', sans-serif; font-size: 22px; font-weight: 600; margin-bottom: 24px; }
+.plan-price { margin-bottom: 28px; }
+.plan-price .amount { font-family: 'Clash Display', sans-serif; font-size: 48px; font-weight: 700; color: var(--white); letter-spacing: -0.03em; }
+.plan-price .cur { font-size: 20px; font-weight: 400; color: var(--muted2); vertical-align: super; }
+.plan-price .per { font-size: 13px; color: var(--muted); }
+.plan-divider { height: 1px; background: var(--border); margin-bottom: 24px; }
+.plan-feats { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
+.plan-feats li { font-size: 14px; color: var(--muted2); display: flex; align-items: center; gap: 10px; }
+.plan-feats li .tick { width: 17px; height: 17px; border-radius: 5px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.plan-feats li .tick.ok { background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.25); }
+.plan-feats li .tick.ok svg { width: 10px; height: 10px; }
+.plan-feats li .tick.no { background: rgba(107,122,153,0.1); border: 1px solid var(--border); }
+
+/* ===================== FAQ ===================== */
+.faq-list { max-width: 720px; margin: 64px auto 0; display: flex; flex-direction: column; gap: 4px; }
+.faq-item {
+  border: 1px solid var(--border); border-radius: 12px;
+  overflow: hidden; background: var(--surface);
+}
+.faq-q {
+  width: 100%; background: none; border: none; cursor: pointer;
+  padding: 22px 28px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 400; color: var(--white);
+  text-align: left;
+}
+.faq-q .faq-arrow { width: 24px; height: 24px; border-radius: 6px; background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform .25s; }
+.faq-q.open .faq-arrow { transform: rotate(180deg); background: rgba(59,130,246,0.15); }
+.faq-a { max-height: 0; overflow: hidden; transition: max-height .3s ease, padding .3s; }
+.faq-a.open { max-height: 300px; padding-bottom: 22px; }
+.faq-a-inner { padding: 0 28px; font-size: 15px; color: var(--muted2); line-height: 1.75; }
+
+/* ===================== FOOTER ===================== */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 64px 24px 40px;
+  background: var(--bg);
+}
+.footer-inner {
+  max-width: 1160px; margin: 0 auto;
+  display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px;
+  margin-bottom: 60px;
+}
+.footer-brand p { font-size: 14px; color: var(--muted); line-height: 1.75; margin-top: 16px; max-width: 260px; }
+.footer-col h4 { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 20px; }
+.footer-col a { display: block; font-size: 14px; color: var(--muted2); text-decoration: none; margin-bottom: 12px; transition: color .2s; }
+.footer-col a:hover { color: var(--white); }
+.footer-bottom {
+  max-width: 1160px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  padding-top: 32px; border-top: 1px solid var(--border);
+  font-size: 13px; color: var(--muted); flex-wrap: wrap; gap: 16px;
+}
+.footer-legal { display: flex; gap: 24px; flex-wrap: wrap; }
+.footer-legal a { color: var(--muted); text-decoration: none; transition: color .2s; }
+.footer-legal a:hover { color: var(--white); }
+
+/* ===================== ANIMATIONS ===================== */
+@keyframes fadeUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+.hero-eyebrow { animation: fadeUp .5s .1s both; }
+.hero h1 { animation: fadeUp .5s .2s both; }
+.hero-sub { animation: fadeUp .5s .3s both; }
+.hero-actions { animation: fadeUp .5s .4s both; }
+.hero-metrics { animation: fadeUp .5s .5s both; }
+
+/* ===================== RESPONSIVE ===================== */
+@media (max-width: 1024px) {
+  .about-grid { grid-template-columns: 1fr; gap: 48px; }
+  .how-grid { grid-template-columns: repeat(2, 1fr); }
+  .adv-grid { grid-template-columns: repeat(2, 1fr); }
+  .dir-grid { grid-template-columns: 1fr; }
+  .bot-inner { grid-template-columns: 1fr; gap: 48px; }
+  .plans-grid { grid-template-columns: 1fr; max-width: 480px; margin: 64px auto 0; }
+  .footer-inner { grid-template-columns: 1fr 1fr; gap: 36px; }
+}
+@media (max-width: 768px) {
+  .nav-links, .nav-actions { display: none; }
+  .hamburger { display: flex; }
+  .section { padding: 80px 0; }
+  .how-grid { grid-template-columns: 1fr; }
+  .adv-grid { grid-template-columns: 1fr; }
+  .hero-metrics { flex-direction: column; }
+  .metric { border-right: none; border-bottom: 1px solid var(--border); }
+  .metric:last-child { border-bottom: none; }
+  .footer-inner { grid-template-columns: 1fr; gap: 32px; }
+  .footer-bottom { flex-direction: column; text-align: center; }
+  .dir-card { padding: 36px 28px; }
+  .dir-speed { font-size: 52px; }
+}
+@media (max-width: 480px) {
+  h1 { font-size: 36px; }
+  h2 { font-size: 26px; }
+  .btn-lg { padding: 15px 24px; font-size: 15px; }
+  .hero { padding: 100px 20px 60px; }
+  .about-visual { padding: 32px 24px; }
+}
+
+/* ===================== MOBILE MENU ===================== */
+.mobile-menu {
+  display: none; position: fixed; inset: 0; z-index: 190;
+  background: rgba(8,12,20,0.98); backdrop-filter: blur(20px);
+  flex-direction: column; align-items: center; justify-content: center; gap: 32px;
+  padding: 80px 24px 40px;
+}
+.mobile-menu.open { display: flex; }
+.mobile-menu a {
+  font-family: 'Clash Display', sans-serif; font-size: 28px; font-weight: 600;
+  color: var(--muted2); text-decoration: none; transition: color .2s;
+}
+.mobile-menu a:hover { color: var(--white); }
+.mobile-menu .mobile-actions { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 280px; margin-top: 16px; }
+.hamburger-close { position: absolute; top: 20px; right: 20px; background: none; border: none; cursor: pointer; padding: 8px; }
+.hamburger-close svg { width: 24px; height: 24px; stroke: var(--muted2); }
+
+/* ===================== MODAL ===================== */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 300;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+  align-items: center; justify-content: center; padding: 24px;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--bg1); border: 1px solid var(--border2);
+  border-radius: var(--radius-xl); padding: 48px 40px;
+  width: 100%; max-width: 480px; position: relative;
+  animation: modalIn .25s ease;
+}
+@keyframes modalIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+.modal-close {
+  position: absolute; top: 20px; right: 20px;
+  background: rgba(255,255,255,0.06); border: none; cursor: pointer;
+  width: 32px; height: 32px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--muted); transition: background .2s;
+}
+.modal-close:hover { background: rgba(255,255,255,0.1); }
+.modal-step { display: none; }
+.modal-step.active { display: block; }
+.modal h3 { font-size: 22px; margin-bottom: 8px; }
+.modal .modal-sub { font-size: 14px; color: var(--muted2); margin-bottom: 32px; line-height: 1.6; }
+.modal-plan-display {
+  background: rgba(34,211,238,0.06); border: 1px solid rgba(34,211,238,0.15);
+  border-radius: 12px; padding: 16px 20px; margin-bottom: 24px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-plan-display .plan-info { font-size: 15px; font-weight: 500; color: var(--white); }
+.modal-plan-display .plan-price-sm { font-family: 'Clash Display', sans-serif; font-size: 22px; font-weight: 700; color: var(--cyan); }
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; font-size: 13px; color: var(--muted2); margin-bottom: 8px; font-weight: 400; }
+.form-group input, .form-group select {
+  width: 100%; background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 10px; padding: 13px 16px; color: var(--white);
+  font-family: 'DM Sans', sans-serif; font-size: 15px;
+  outline: none; transition: border-color .2s;
+}
+.form-group input:focus, .form-group select:focus { border-color: var(--cyan); }
+.form-group input::placeholder { color: var(--muted); }
+.form-group select option { background: var(--surface2); }
+.form-hint { font-size: 12px; color: var(--muted); margin-top: 6px; display: flex; align-items: flex-start; gap: 6px; }
+.form-hint svg { width: 14px; height: 14px; flex-shrink: 0; margin-top: 1px; }
+.pay-methods { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }
+.pay-method {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px 16px;
+  display: flex; align-items: center; gap: 10px;
+  cursor: pointer; transition: border-color .2s, background .2s;
+  font-size: 14px; color: var(--muted2);
+}
+.pay-method:hover { border-color: var(--border2); }
+.pay-method.selected { border-color: var(--cyan); background: rgba(34,211,238,0.06); color: var(--white); }
+.pay-method .pm-icon { font-size: 20px; }
+.order-summary {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 20px; margin-bottom: 24px;
+}
+.order-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 10px; }
+.order-row:last-child { margin-bottom: 0; padding-top: 10px; border-top: 1px solid var(--border); font-weight: 500; font-size: 16px; }
+.order-row .label { color: var(--muted2); }
+.order-row .val { color: var(--white); }
+.order-row:last-child .val { color: var(--cyan); font-family: 'Clash Display', sans-serif; font-size: 20px; }
+.modal-progress { display: flex; gap: 8px; margin-bottom: 32px; }
+.modal-progress .step-dot {
+  height: 3px; flex: 1; border-radius: 2px; background: var(--border2); transition: background .3s;
+}
+.modal-progress .step-dot.done { background: var(--cyan); }
+.success-icon {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 24px;
+}
+.success-icon svg { width: 36px; height: 36px; }
+.error-banner {
+  background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25);
+  border-radius: 8px; padding: 12px 16px; font-size: 13px; color: #f87171;
+  margin-bottom: 16px; display: none;
+}
+.error-banner.show { display: block; }
+
+/* ===================== SUB-PAGES ===================== */
+#main-content, #page-content { transition: opacity .2s; }
+.subpage { display: none; }
+.subpage.active { display: block; }
+.page-hero {
+  padding: 140px 24px 80px; text-align: center;
+  background: linear-gradient(180deg, rgba(59,130,246,0.06) 0%, transparent 100%);
+  border-bottom: 1px solid var(--border);
+}
+.page-hero h1 { font-size: clamp(28px, 4vw, 48px); margin-bottom: 16px; }
+.page-hero p { font-size: 16px; color: var(--muted2); }
+.prose {
+  max-width: 720px; margin: 0 auto; padding: 80px 24px;
+}
+.prose h2 { font-size: 22px; margin: 48px 0 16px; color: var(--white); }
+.prose h2:first-child { margin-top: 0; }
+.prose p { font-size: 15px; color: var(--muted2); line-height: 1.8; margin-bottom: 16px; }
+.prose ul { padding-left: 20px; margin-bottom: 16px; }
+.prose ul li { font-size: 15px; color: var(--muted2); line-height: 1.8; margin-bottom: 6px; }
+.prose strong { color: var(--white); font-weight: 500; }
+
+/* ===================== STATUS PAGE ===================== */
+.status-grid { display: flex; flex-direction: column; gap: 12px; max-width: 720px; margin: 0 auto; padding: 60px 24px; }
+.status-server {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; padding: 20px 24px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  flex-wrap: wrap;
+}
+.srv-info { display: flex; align-items: center; gap: 14px; }
+.srv-flag { font-size: 24px; }
+.srv-name { font-size: 15px; font-weight: 500; color: var(--white); }
+.srv-loc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.srv-metrics { display: flex; gap: 24px; flex-wrap: wrap; }
+.srv-metric { text-align: center; }
+.srv-metric .val { font-size: 14px; font-weight: 500; color: var(--white); }
+.srv-metric .lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.badge-online { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; color: var(--green); background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); padding: 4px 12px; border-radius: 100px; }
+.badge-online::before { content:''; width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite; }
+.badge-maint { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; color: #f59e0b; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2); padding: 4px 12px; border-radius: 100px; }
+
+/* ===================== LOGIN PAGE ===================== */
+.auth-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 100px 24px 60px; }
+.auth-card { background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius-xl); padding: 48px 40px; width: 100%; max-width: 420px; }
+.auth-card h2 { font-size: 26px; margin-bottom: 8px; }
+.auth-card .auth-sub { font-size: 14px; color: var(--muted2); margin-bottom: 36px; }
+.auth-divider { display: flex; align-items: center; gap: 16px; margin: 24px 0; color: var(--muted); font-size: 13px; }
+.auth-divider::before, .auth-divider::after { content:''; flex:1; height:1px; background:var(--border); }
+.tg-login-btn {
+  width: 100%; padding: 14px; border-radius: 12px; border: none; cursor: pointer;
+  background: #2b5278; color: #e8f4ff; font-family: 'DM Sans', sans-serif;
+  font-size: 15px; font-weight: 500; display: flex; align-items: center; justify-content: center;
+  gap: 10px; transition: background .2s;
+}
+.tg-login-btn:hover { background: #3a6fa0; }
+.tg-login-btn svg { width: 20px; height: 20px; }
+
+/* ===================== ACCOUNT PAGE ===================== */
+.account-wrap { max-width: 800px; margin: 0 auto; padding: 100px 24px 80px; }
+.account-header { display: flex; align-items: center; gap: 20px; margin-bottom: 48px; padding-bottom: 32px; border-bottom: 1px solid var(--border); }
+.account-avatar { width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, var(--blue), var(--cyan)); display: flex; align-items: center; justify-content: center; font-family: 'Clash Display', sans-serif; font-size: 24px; font-weight: 700; color: #fff; }
+.account-name { font-size: 22px; font-weight: 600; color: var(--white); }
+.account-id { font-size: 13px; color: var(--muted); margin-top: 4px; }
+.sub-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 28px 24px; margin-bottom: 16px; }
+.sub-card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
+.sub-card h3 { font-size: 17px; }
+.sub-card .sub-expires { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.sub-progress { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; margin-bottom: 12px; }
+.sub-progress-bar { height: 100%; background: linear-gradient(90deg, var(--blue), var(--cyan)); border-radius: 2px; transition: width .5s; }
+.config-list { display: flex; flex-direction: column; gap: 10px; }
+.config-item { background: var(--bg1); border: 1px solid var(--border); border-radius: 10px; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; }
+.config-item .ci-name { font-size: 14px; color: var(--white); }
+.config-item .ci-device { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.config-item .ci-actions { display: flex; gap: 8px; }
+.ci-btn { background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: var(--muted2); font-size: 12px; padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: all .2s; font-family: 'DM Sans', sans-serif; }
+.ci-btn:hover { border-color: var(--border2); color: var(--white); }
+</style>
+</head>
+<body>
+
+<!-- ===================== NAV ===================== -->
+<nav id="main-nav">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo" onclick="showPage('home');return false;">Hiper<span>VPN</span></a>
+    <ul class="nav-links">
+      <li><a href="#about" onclick="showPage('home');setTimeout(()=>document.getElementById('about').scrollIntoView({behavior:'smooth'}),50);return false;">О сервисе</a></li>
+      <li><a href="#how" onclick="showPage('home');setTimeout(()=>document.getElementById('how').scrollIntoView({behavior:'smooth'}),50);return false;">Как работает</a></li>
+      <li><a href="#directions" onclick="showPage('home');setTimeout(()=>document.getElementById('directions').scrollIntoView({behavior:'smooth'}),50);return false;">Направления</a></li>
+      <li><a href="#tariffs" onclick="showPage('home');setTimeout(()=>document.getElementById('tariffs').scrollIntoView({behavior:'smooth'}),50);return false;">Тарифы</a></li>
+      <li><a href="#" onclick="showPage('status');return false;">Серверы</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="#" class="btn btn-outline btn-sm" onclick="showPage('login');return false;">Войти</a>
+      <a href="#" class="btn btn-primary btn-sm" onclick="showPage('home');setTimeout(()=>document.getElementById('tariffs').scrollIntoView({behavior:'smooth'}),50);return false;">Подключиться</a>
+    </div>
+    <div class="hamburger" id="hamburger-btn" onclick="document.getElementById('mobile-menu').classList.add('open')">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</nav>
+
+<!-- ===================== MOBILE MENU ===================== -->
+<div class="mobile-menu" id="mobile-menu">
+  <button class="hamburger-close" onclick="document.getElementById('mobile-menu').classList.remove('open')">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+  </button>
+  <a href="#" onclick="closeMobile();showPage('home');setTimeout(()=>document.getElementById('about').scrollIntoView({behavior:'smooth'}),50);return false;">О сервисе</a>
+  <a href="#" onclick="closeMobile();showPage('home');setTimeout(()=>document.getElementById('how').scrollIntoView({behavior:'smooth'}),50);return false;">Как работает</a>
+  <a href="#" onclick="closeMobile();showPage('home');setTimeout(()=>document.getElementById('directions').scrollIntoView({behavior:'smooth'}),50);return false;">Направления</a>
+  <a href="#" onclick="closeMobile();showPage('home');setTimeout(()=>document.getElementById('tariffs').scrollIntoView({behavior:'smooth'}),50);return false;">Тарифы</a>
+  <a href="#" onclick="closeMobile();showPage('status');return false;">Статус серверов</a>
+  <div class="mobile-actions">
+    <a href="#" class="btn btn-outline" style="justify-content:center;" onclick="closeMobile();showPage('login');return false;">Войти</a>
+    <a href="#" class="btn btn-cyan" style="justify-content:center;" onclick="closeMobile();showPage('home');setTimeout(()=>document.getElementById('tariffs').scrollIntoView({behavior:'smooth'}),50);return false;">Подключиться</a>
+  </div>
+</div>
+
+<!-- ===================== PAYMENT MODAL ===================== -->
+<div class="modal-overlay" id="pay-modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1 1l12 12M13 1L1 13"/></svg>
+    </button>
+
+    <!-- Progress -->
+    <div class="modal-progress">
+      <div class="step-dot done" id="dot1"></div>
+      <div class="step-dot" id="dot2"></div>
+      <div class="step-dot" id="dot3"></div>
+    </div>
+
+    <!-- Step 1: Telegram ID -->
+    <div class="modal-step active" id="modal-step-1">
+      <h3>Подключить HiperVPN</h3>
+      <p class="modal-sub">Введите ваш Telegram ID — на него будет выслан конфиг после оплаты. Узнать ID можно у <strong style="color:var(--cyan);">@userinfobot</strong> в Telegram.</p>
+      <div class="modal-plan-display" id="modal-plan-display">
+        <div class="plan-info" id="modal-plan-name">Месяц — Старт</div>
+        <div class="plan-price-sm" id="modal-plan-price">299 ₽</div>
+      </div>
+      <div class="form-group">
+        <label>Ваш Telegram ID</label>
+        <input type="text" id="tg-id-input" placeholder="123456789" oninput="validateTgId(this)">
+        <div class="form-hint">
+          <svg viewBox="0 0 14 14" fill="none" stroke="var(--muted)" stroke-width="1.2"><circle cx="7" cy="7" r="6"/><path d="M7 6v4M7 4.5v.5" stroke-linecap="round"/></svg>
+          Только цифры. Не путайте с username (@nickname).
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Email для чека (необязательно)</label>
+        <input type="email" id="email-input" placeholder="your@email.com">
+      </div>
+      <div class="error-banner" id="step1-error">Введите корректный Telegram ID (только цифры, 5–12 знаков)</div>
+      <button class="btn btn-cyan" style="width:100%;justify-content:center;padding:15px;" onclick="goToStep2()">Далее — выбор оплаты →</button>
+    </div>
+
+    <!-- Step 2: Payment method -->
+    <div class="modal-step" id="modal-step-2">
+      <h3>Способ оплаты</h3>
+      <p class="modal-sub">Выберите удобный способ. После оплаты конфиг придёт в Telegram автоматически.</p>
+      <div class="pay-methods">
+        <div class="pay-method selected" id="pm-card" onclick="selectPayMethod('card')">
+          <span class="pm-icon">💳</span> Карта
+        </div>
+        <div class="pay-method" id="pm-usdt" onclick="selectPayMethod('usdt')">
+          <span class="pm-icon">💚</span> USDT
+        </div>
+        <div class="pay-method" id="pm-ton" onclick="selectPayMethod('ton')">
+          <span class="pm-icon">💎</span> TON
+        </div>
+        <div class="pay-method" id="pm-stars" onclick="selectPayMethod('stars')">
+          <span class="pm-icon">⭐</span> Stars
+        </div>
+      </div>
+      <div class="order-summary">
+        <div class="order-row"><span class="label">Тариф</span><span class="val" id="sum-plan">—</span></div>
+        <div class="order-row"><span class="label">Telegram ID</span><span class="val" id="sum-tgid">—</span></div>
+        <div class="order-row"><span class="label">Способ</span><span class="val" id="sum-method">Карта</span></div>
+        <div class="order-row"><span class="label">Итого</span><span class="val" id="sum-total">—</span></div>
+      </div>
+      <div class="error-banner" id="step2-error">Ошибка создания заказа. Попробуйте позже.</div>
+      <div style="display:flex;gap:12px;">
+        <button class="btn btn-outline" style="padding:15px 20px;" onclick="goToStep1()">← Назад</button>
+        <button class="btn btn-cyan" style="flex:1;justify-content:center;padding:15px;" id="pay-btn" onclick="processPayment()">Оплатить</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Success -->
+    <div class="modal-step" id="modal-step-3">
+      <div class="success-icon">
+        <svg viewBox="0 0 36 36" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 18l7 7 13-13"/></svg>
+      </div>
+      <h3 style="text-align:center;">Заказ создан!</h3>
+      <p class="modal-sub" style="text-align:center;">Перейдите к оплате по ссылке ниже. После подтверждения платежа конфиг автоматически придёт в Telegram на ID <strong style="color:var(--cyan);" id="success-tgid"></strong>.</p>
+      <a href="#" id="payment-link" class="btn btn-cyan btn-lg" style="width:100%;justify-content:center;margin-bottom:12px;" target="_blank">Перейти к оплате →</a>
+      <button class="btn btn-outline" style="width:100%;justify-content:center;padding:13px;" onclick="closeModal()">Закрыть</button>
+      <p style="font-size:12px;color:var(--muted);text-align:center;margin-top:16px;">Не получили конфиг? Напишите <a href="https://t.me/hipervpn_bot" style="color:var(--cyan);">@hipervpn_bot</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== HERO ===================== -->
+<section class="hero">
+  <div class="hero-grid"></div>
+
+  <!-- Animated SVG network -->
+  <div class="hero-bg">
+    <svg viewBox="0 0 1400 800" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <radialGradient id="glow1" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.3"/>
+          <stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="glow2" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.25"/>
+          <stop offset="100%" stop-color="#22d3ee" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <!-- glow circles -->
+      <ellipse cx="700" cy="400" rx="500" ry="350" fill="url(#glow1)"/>
+      <ellipse cx="1100" cy="200" rx="280" ry="200" fill="url(#glow2)"/>
+
+      <!-- network nodes -->
+      <g opacity="0.6">
+        <!-- lines -->
+        <line x1="700" y1="400" x2="200" y2="180" stroke="#3b82f6" stroke-width="0.5" stroke-opacity="0.4"/>
+        <line x1="700" y1="400" x2="1100" y2="200" stroke="#22d3ee" stroke-width="0.5" stroke-opacity="0.5"/>
+        <line x1="700" y1="400" x2="1200" y2="550" stroke="#3b82f6" stroke-width="0.5" stroke-opacity="0.35"/>
+        <line x1="700" y1="400" x2="400" y2="620" stroke="#3b82f6" stroke-width="0.5" stroke-opacity="0.35"/>
+        <line x1="700" y1="400" x2="100" y2="500" stroke="#3b82f6" stroke-width="0.5" stroke-opacity="0.25"/>
+        <line x1="700" y1="400" x2="900" y2="700" stroke="#22d3ee" stroke-width="0.5" stroke-opacity="0.3"/>
+        <line x1="1100" y1="200" x2="1200" y2="550" stroke="#22d3ee" stroke-width="0.5" stroke-opacity="0.3"/>
+        <line x1="200" y1="180" x2="400" y2="620" stroke="#3b82f6" stroke-width="0.5" stroke-opacity="0.2"/>
+        <!-- small connector lines -->
+        <line x1="200" y1="180" x2="100" y2="500" stroke="#3b82f6" stroke-width="0.5" stroke-opacity="0.2"/>
+        <line x1="1200" y1="550" x2="900" y2="700" stroke="#22d3ee" stroke-width="0.5" stroke-opacity="0.25"/>
+
+        <!-- nodes -->
+        <circle cx="700" cy="400" r="6" fill="#3b82f6" fill-opacity="0.9"/>
+        <circle cx="700" cy="400" r="14" fill="#3b82f6" fill-opacity="0.12"/>
+        <circle cx="700" cy="400" r="22" fill="#3b82f6" fill-opacity="0.06"/>
+        <circle cx="1100" cy="200" r="5" fill="#22d3ee" fill-opacity="0.85"/>
+        <circle cx="1100" cy="200" r="12" fill="#22d3ee" fill-opacity="0.1"/>
+        <circle cx="200" cy="180" r="4" fill="#3b82f6" fill-opacity="0.7"/>
+        <circle cx="200" cy="180" r="10" fill="#3b82f6" fill-opacity="0.1"/>
+        <circle cx="1200" cy="550" r="4" fill="#22d3ee" fill-opacity="0.65"/>
+        <circle cx="1200" cy="550" r="10" fill="#22d3ee" fill-opacity="0.1"/>
+        <circle cx="400" cy="620" r="3.5" fill="#3b82f6" fill-opacity="0.6"/>
+        <circle cx="100" cy="500" r="3" fill="#3b82f6" fill-opacity="0.5"/>
+        <circle cx="900" cy="700" r="3.5" fill="#22d3ee" fill-opacity="0.5"/>
+        <circle cx="500" cy="250" r="3" fill="#3b82f6" fill-opacity="0.4"/>
+        <circle cx="950" cy="450" r="3" fill="#3b82f6" fill-opacity="0.4"/>
+        <circle cx="650" cy="650" r="2.5" fill="#22d3ee" fill-opacity="0.35"/>
+        <!-- extra nodes -->
+        <line x1="700" y1="400" x2="500" y2="250" stroke="#3b82f6" stroke-width="0.5" stroke-opacity="0.3"/>
+        <line x1="700" y1="400" x2="950" y2="450" stroke="#3b82f6" stroke-width="0.5" stroke-opacity="0.3"/>
+      </g>
+
+      <!-- animated traffic dots -->
+      <circle r="3" fill="#22d3ee" fill-opacity="0.9">
+        <animateMotion dur="4s" repeatCount="indefinite" path="M700,400 L1100,200"/>
+        <animate attributeName="fill-opacity" dur="4s" repeatCount="indefinite" values="0;0.9;0.9;0"/>
+      </circle>
+      <circle r="2.5" fill="#3b82f6" fill-opacity="0.9">
+        <animateMotion dur="5s" repeatCount="indefinite" path="M700,400 L200,180"/>
+        <animate attributeName="fill-opacity" dur="5s" repeatCount="indefinite" values="0;0.9;0.9;0"/>
+      </circle>
+      <circle r="2" fill="#22d3ee" fill-opacity="0.8">
+        <animateMotion dur="6s" repeatCount="indefinite" path="M1100,200 L1200,550"/>
+        <animate attributeName="fill-opacity" dur="6s" repeatCount="indefinite" values="0;0.8;0.8;0"/>
+      </circle>
+      <circle r="2" fill="#10b981" fill-opacity="0.8">
+        <animateMotion dur="4.5s" repeatCount="indefinite" path="M700,400 L400,620"/>
+        <animate attributeName="fill-opacity" dur="4.5s" repeatCount="indefinite" values="0;0.8;0.8;0"/>
+      </circle>
+    </svg>
+  </div>
+
+  <div class="hero-content">
+    <div class="hero-eyebrow">
+      <span class="dot"></span>
+      <strong>Сервис активен</strong> &nbsp;·&nbsp; Uptime 99.97% за последние 90 дней
+    </div>
+    <h1>Интернет на полной<br><span class="g-blue">скорости. Без слежки.</span></h1>
+    <p class="hero-sub">Два независимых канала — до 1 Гбит/с по белым спискам и до 10 Гбит/с основной VPN. Подключение за 60 секунд через Telegram-бота.</p>
+    <div class="hero-actions">
+      <a href="#tariffs" class="btn btn-cyan btn-lg">Подключиться сейчас</a>
+      <a href="#how" class="btn btn-outline btn-lg">Как это работает</a>
+    </div>
+    <div class="hero-metrics">
+      <div class="metric">
+        <div class="metric-num g-speed">10 Гбит/с</div>
+        <div class="metric-label">Пиковая скорость</div>
+      </div>
+      <div class="metric">
+        <div class="metric-num">5</div>
+        <div class="metric-label">Серверных локаций</div>
+      </div>
+      <div class="metric">
+        <div class="metric-num">0 logs</div>
+        <div class="metric-label">Без логов активности</div>
+      </div>
+      <div class="metric">
+        <div class="metric-num">AES‑256</div>
+        <div class="metric-label">Шифрование</div>
+      </div>
+      <div class="metric">
+        <div class="metric-num">60 сек</div>
+        <div class="metric-label">До подключения</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== ABOUT ===================== -->
+<section class="section" id="about">
+  <div class="container">
+    <div style="max-width:680px;">
+      <div class="about-text">
+        <div class="tag">О сервисе</div>
+        <h2>Профессиональная защита без лишних слов</h2>
+        <p class="section-lead">HiperVPN — это инфраструктура корпоративного класса, доступная частным пользователям. Два независимых канала для разных задач, управляемых через простого бота.</p>
+        <ul class="check-list">
+          <li>
+            <span class="check-icon">
+              <svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#10b981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            Строгая политика no-log — мы не храним данные о вашей активности
+          </li>
+          <li>
+            <span class="check-icon">
+              <svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#10b981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            Современные протоколы безопасности — высокая скорость и надёжная защита
+          </li>
+          <li>
+            <span class="check-icon">
+              <svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#10b981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            Kill Switch автоматически блокирует трафик при разрыве туннеля
+          </li>
+          <li>
+            <span class="check-icon">
+              <svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#10b981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            Управление через Telegram-бота — без приложений и настроек вручную
+          </li>
+          <li>
+            <span class="check-icon">
+              <svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#10b981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            Собственная инфраструктура, 5 серверных локаций
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ===================== HOW IT WORKS ===================== -->
+<section class="section" id="how">
+  <div class="container">
+    <div class="tag">Процесс</div>
+    <h2>Как это работает</h2>
+    <p style="font-size:16px;max-width:500px;">Настройка занимает меньше минуты. Никаких технических знаний не нужно.</p>
+    <div class="how-grid">
+      <div class="step-card">
+        <div class="step-num">01</div>
+        <div class="step-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        </div>
+        <h3>Откройте бота</h3>
+        <p>Перейдите в Telegram и запустите @HiperVPN_bot. Никакой регистрации — всё через аккаунт Telegram.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">02</div>
+        <div class="step-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        </div>
+        <h3>Выберите тариф</h3>
+        <p>Бот покажет актуальные тарифы. Выберите подходящий канал и оплатите удобным способом.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">03</div>
+        <div class="step-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.5" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        </div>
+        <h3>Получите конфиг</h3>
+        <p>Бот автоматически выдаёт готовый конфиг подключения. Просто импортируйте его в приложение.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">04</div>
+        <div class="step-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg>
+        </div>
+        <h3>Подключайтесь</h3>
+        <p>Одно нажатие в приложении — и вы защищены. Работает на всех устройствах: iOS, Android, Windows, macOS.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ===================== ADVANTAGES ===================== -->
+<section class="section">
+  <div class="container">
+    <div class="tag">Преимущества</div>
+    <h2>Почему выбирают HiperVPN</h2>
+    <div class="adv-grid">
+      <div class="adv-card">
+        <div class="icon" style="background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.2);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        </div>
+        <h3>До 10 Гбит/с без ограничений</h3>
+        <p>Основной VPN-канал работает на серверах с выделенными 10-гигабитными портами. Никаких искусственных лимитов на скорость.</p>
+      </div>
+      <div class="adv-card">
+        <div class="icon" style="background:rgba(34,211,238,0.1);border:1px solid rgba(34,211,238,0.2);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <h3>Нулевое хранение логов</h3>
+        <p>Политика no-log подтверждена архитектурой. Серверы работают в RAM без возможности записи на диск.</p>
+      </div>
+      <div class="adv-card">
+        <div class="icon" style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+        </div>
+        <h3>Современный протокол</h3>
+        <p>Передовые VPN-протоколы с минимальной задержкой, максимальной скоростью и открытым исходным кодом.</p>
+      </div>
+      <div class="adv-card">
+        <div class="icon" style="background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.2);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18.01"/></svg>
+        </div>
+        <h3>Все платформы</h3>
+        <p>iOS, Android, Windows, macOS, Linux и роутеры. Одна подписка — до 5 одновременных подключений.</p>
+      </div>
+      <div class="adv-card">
+        <div class="icon" style="background:rgba(34,211,238,0.1);border:1px solid rgba(34,211,238,0.2);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="1.5" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <h3>Стабильность 99.97%</h3>
+        <p>Резервирование каналов и автоматическое переключение серверов при сбоях. Ваше соединение не прерывается.</p>
+      </div>
+      <div class="adv-card">
+        <div class="icon" style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="1.5" stroke-linecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        </div>
+        <h3>Поддержка 24/7</h3>
+        <p>Служба поддержки через Telegram. Ответ в течение 15 минут в рабочее время, технические вопросы — в течение часа.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ===================== DIRECTIONS ===================== -->
+<section class="section" id="directions">
+  <div class="container">
+    <div class="tag">Два направления</div>
+    <h2>Выберите свой канал</h2>
+    <p style="font-size:16px;max-width:520px;margin-bottom:0;">Разные задачи — разные инструменты. Оба канала доступны в рамках одного аккаунта.</p>
+    <div class="dir-grid">
+      <!-- Whitelist -->
+      <div class="dir-card whitelist">
+        <div class="dir-badge wb">Белые списки</div>
+        <div class="dir-speed" style="color:var(--muted2);">1 Гбит/с</div>
+        <div class="dir-speed-label">пропускная способность</div>
+        <h3>Доступ по белым спискам</h3>
+        <p>Избирательный канал для доступа к конкретным ресурсам. Трафик проходит через VPN только для указанных доменов — остальное идёт напрямую. Идеально для обхода блокировок без замедления общей скорости.</p>
+        <ul class="dir-features">
+          <li>Выборочный туннелинг по доменам</li>
+          <li>Не влияет на скорость других соединений</li>
+          <li>Автообновление белых списков</li>
+          <li>Минимальная задержка</li>
+          <li>До 5 устройств</li>
+        </ul>
+        <a href="#tariffs" class="btn btn-outline" style="width:100%;justify-content:center;">Подключить</a>
+      </div>
+
+      <!-- Main channel -->
+      <div class="dir-card mainchannel">
+        <div class="dir-badge mb">Основной VPN</div>
+        <div class="dir-speed g-speed">10 Гбит/с</div>
+        <div class="dir-speed-label">пропускная способность</div>
+        <h3>Полный VPN-туннель</h3>
+        <p>Весь трафик проходит через защищённый туннель. Максимальная анонимность, полная защита от слежки и анализа трафика. Для стриминга, загрузок и работы в условиях строгих ограничений.</p>
+        <ul class="dir-features">
+          <li>Весь трафик через туннель</li>
+          <li>Скорость до 10 Гбит/с</li>
+          <li>5 серверных локаций</li>
+          <li>Kill Switch + DNS leak protection</li>
+          <li>До 5 устройств</li>
+        </ul>
+        <a href="#tariffs" class="btn btn-cyan" style="width:100%;justify-content:center;">Подключить</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ===================== BOT BLOCK ===================== -->
+<section class="section bot-section" id="bot">
+  <div class="container">
+    <div class="bot-inner">
+      <div class="bot-text">
+        <div class="tag">Telegram-бот</div>
+        <h2>Управление в одном мессенджере</h2>
+        <p>Не нужно заходить на сайт, не нужно ничего устанавливать заранее. Весь процесс — от покупки до получения конфига — происходит прямо в Telegram.</p>
+        <div class="bot-steps">
+          <div class="bot-step">
+            <div class="bot-step-num">1</div>
+            <div class="bot-step-text">
+              <h4>Запустите @HiperVPN_bot</h4>
+              <p>Нажмите /start и следуйте инструкциям бота</p>
+            </div>
+          </div>
+          <div class="bot-step">
+            <div class="bot-step-num">2</div>
+            <div class="bot-step-text">
+              <h4>Выберите направление и тариф</h4>
+              <p>Белые списки или полный VPN — бот покажет разницу</p>
+            </div>
+          </div>
+          <div class="bot-step">
+            <div class="bot-step-num">3</div>
+            <div class="bot-step-text">
+              <h4>Оплатите и получите конфиг</h4>
+              <p>Бот автоматически выдаёт конфиг — просто импортируйте его в приложение</p>
+            </div>
+          </div>
+          <div class="bot-step">
+            <div class="bot-step-num">4</div>
+            <div class="bot-step-text">
+              <h4>Управляйте подпиской</h4>
+              <p>Продление, смена сервера, статус — всё через бота</p>
+            </div>
+          </div>
+        </div>
+        <a href="https://t.me/hipervpn_bot" class="btn btn-cyan btn-lg">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.01 9.469c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.873.752z"/></svg>
+          Открыть бота
+        </a>
+      </div>
+
+      <!-- Telegram mockup -->
+      <div class="tg-mockup">
+        <div class="tg-header">
+          <div class="tg-avatar">🛡</div>
+          <div>
+            <div class="tg-name">HiperVPN Bot</div>
+            <div class="tg-status">● онлайн</div>
+          </div>
+        </div>
+        <div class="tg-body">
+          <div class="tg-msg bot">
+            👋 Привет! Я помогу вам подключиться к HiperVPN.<br><br>
+            Выберите нужное направление:
+            <div class="time">12:04</div>
+          </div>
+          <div class="tg-msg user">
+            Хочу полный VPN, 1 месяц
+            <div class="time">12:05</div>
+          </div>
+          <div class="tg-msg bot">
+            ✅ Отлично! Тариф <strong>VPN Pro — 299 ₽/мес</strong><br><br>
+            Скорость до 10 Гбит/с · 5 серверов<br>
+            До 5 устройств · Kill Switch
+            <div class="time">12:05</div>
+          </div>
+          <div class="tg-msg user">
+            Оплатить картой
+            <div class="time">12:06</div>
+          </div>
+          <div class="tg-msg bot">
+            🔐 Оплата прошла успешно!<br><br>
+            Ваш конфиг готов. Нажмите кнопку ниже, чтобы получить данные подключения.
+            <div class="time">12:06</div>
+          </div>
+        </div>
+        <div class="tg-btns">
+          <div class="tg-btn">📁 Скачать конфиг</div>
+          <div class="tg-btn">📷 QR-код</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ===================== PLANS ===================== -->
+<section class="section" id="tariffs">
+  <div class="container" style="text-align:center;">
+    <div class="tag" style="margin-bottom:24px;">Тарифы</div>
+    <h2>Прозрачные цены</h2>
+    <p style="font-size:16px;max-width:460px;margin:0 auto;">Все тарифы включают оба направления. Гарантия возврата в течение 7 дней.</p>
+    <div class="plans-grid">
+      <div class="plan-card">
+        <div class="plan-tier">Старт</div>
+        <div class="plan-name">Месяц</div>
+        <div class="plan-price">
+          <span class="cur">₽</span><span class="amount">299</span>
+          <div class="per">в месяц</div>
+        </div>
+        <div class="plan-divider"></div>
+        <ul class="plan-feats">
+          <li><span class="tick ok"><svg viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 5-5" stroke="#10b981" stroke-width="1.5" stroke-linecap="round"/></svg></span> Белые списки до 1 Гбит/с</li>
+          <li><span class="tick ok"><svg viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 5-5" stroke="#10b981" stroke-width="1.5" stroke-linecap="round"/></svg></span> Полный VPN до 10 Гбит/с</li>
+          <li><span class="tick ok"><svg viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 5-5" stroke="#10b981" stroke-width="1.5" stroke-linecap="round"/></svg></span> До 3 устройств</li>
+          <li><span class="tick ok"><svg viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 5-5" stroke="#10b981" stroke-width="1.5" stroke-linecap="round"/></svg></span> 5 серверных локаций</li>
+          <li><span class="tick no"><svg viewBox="0 0 10 10" fill="none"><path d="M2.5 2.5l5 5M7.5 2.5l-5 5" stroke="#6b7a99" stroke-width="1.5" stroke-linecap="round"/></svg></span> <span style="color:var(--muted)">Приоритетная поддержка</span></li>
+        </ul>
+        <a href="https://t.me/hipervpn_bot" class="btn btn-outline" style="width:100%;justify-content:center;">Попробовать</a>
+      </div>
+
+      <div class="plan-card featured">
+        <div class="featured-label">Популярный</div>
+        <div class="plan-tier">Оптимально</div>
+        <div class="plan-name">6 месяцев</div>
+        <div class="plan-price">
+          <span class="cur">₽</span><span class="amount">199</span>
+          <div class="per">в месяц · <span style="color:var(--green)">экономия 33%</span></div>
+        </div>
+        <div class="plan-divider"></div>
+        <ul class="plan-feats">
+          <li><span class="tick ok"><svg viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 5-5" stroke="#10b981" stroke-width="1.5" stroke-linecap="round"/></svg></span> Белые списки до 1 Гбит/с</li>
+          <li><span class="tick ok"><svg viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 5-5" stroke="#10b981" stroke-width="1.5" stroke-linecap="round"/></svg></span> Полный VPN до 10 Гбит/с</li>
+          <li><span class="tick ok"><svg viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 5-5" stroke="#10b981" stroke-width="1.5" stroke-linecap="round"/></svg></span> До 5 устройств</li>
+          <li><span class="tick ok"><svg viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 5-5" stroke="#10b981" stroke-width="1.5" stroke-linecap="round"/></svg></span> 5 серверных локаций</li>
+          <li><span class="tick ok"><svg viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 5-5" stroke="#10b981" stroke-width="1.5" stroke-linecap="round"/></svg></span> Приоритетная поддержка</li>
+        </ul>
+        <a href="https://t.me/hipervpn_bot" class="btn btn-cyan" style="width:100%;justify-content:center;">Подключиться</a>
+      </div>
+
+      <div class="plan-card">
+        <div class="plan-tier">Максимум</div>
+        <div class="plan-name">Год</div>
+        <div class="plan-price">
+          <span class="cur">₽</span><span class="amount">149</span>
+          <div class="per">в месяц · <span style="color:var(--green)">экономия 50%</span></div>
+        </div>
+        <div class="plan-divider"></div>
+        <ul class="plan-feats">
+          <li><span class="tick ok"><svg viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 5-5" stroke="#10b981" stroke-width="1.5" stroke-linecap="round"/></svg></span> Белые списки до 1 Гбит/с</li>
+          <li><span class="tick ok"><svg viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 5-5" stroke="#10b981" stroke-width="1.5" stroke-linecap="round"/></svg></span> Полный VPN до 10 Гбит/с</li>
+          <li><span class="tick ok"><svg viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 5-5" stroke="#10b981" stroke-width="1.5" stroke-linecap="round"/></svg></span> До 5 устройств</li>
+          <li><span class="tick ok"><svg viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 5-5" stroke="#10b981" stroke-width="1.5" stroke-linecap="round"/></svg></span> 5 серверных локаций</li>
+          <li><span class="tick ok"><svg viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 5-5" stroke="#10b981" stroke-width="1.5" stroke-linecap="round"/></svg></span> Dedicated IP (опция)</li>
+        </ul>
+        <a href="https://t.me/hipervpn_bot" class="btn btn-outline" style="width:100%;justify-content:center;">Подключиться</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ===================== FAQ ===================== -->
+<section class="section" id="faq">
+  <div class="container" style="text-align:center;">
+    <div class="tag" style="margin-bottom:24px;">FAQ</div>
+    <h2>Частые вопросы</h2>
+    <div class="faq-list" style="text-align:left;">
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          <span>Чем отличаются два направления?</span>
+          <span class="faq-arrow"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">Белые списки — это выборочный туннель: через VPN проходит только трафик к указанным доменам (например, заблокированным ресурсам). Основной VPN — полный туннель: весь интернет-трафик шифруется и направляется через наши серверы. Первый вариант быстрее и не влияет на остальной трафик, второй — максимально приватен.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          <span>Как настроить VPN после получения конфига?</span>
+          <span class="faq-arrow"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">Установите приложение для подключения на iOS, Android, Windows или macOS. Импортируйте конфиг, который выдаёт бот — ссылкой или файлом. После этого нажмите переключатель и подключение активируется.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          <span>Храните ли вы логи активности?</span>
+          <span class="faq-arrow"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">Нет. Мы не храним информацию о посещённых сайтах, DNS-запросах, IP-адресах или объёмах трафика. Серверы работают в режиме, исключающем запись данных на диск. Мы храним только технически необходимые данные для работы аккаунта: email и дату окончания подписки.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          <span>Какие способы оплаты доступны?</span>
+          <span class="faq-arrow"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">Принимаем банковские карты (Visa, Mastercard, МИР), криптовалюту (USDT, BTC, TON), а также оплату через Telegram Stars. Все транзакции защищены — данные карты не передаются и не хранятся на наших серверах.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          <span>Можно ли использовать на нескольких устройствах?</span>
+          <span class="faq-arrow"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">Да. В зависимости от тарифа — до 3 или 5 одновременных подключений. Для каждого устройства бот выдаёт отдельный конфиг. Управлять всеми подключениями можно через того же бота.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          <span>Есть ли возврат средств?</span>
+          <span class="faq-arrow"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">Да, мы предоставляем гарантию возврата в течение 7 дней с момента первой оплаты, если сервис не подошёл или не работает корректно на вашем устройстве. Напишите в поддержку через бота.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ===================== FOOTER ===================== -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="nav-logo" style="font-family:'Clash Display',sans-serif;font-size:22px;font-weight:700;color:#f0f4ff;">Hiper<span style="color:#22d3ee;">VPN</span></div>
+      <p>Профессиональная защита и скорость. Два независимых канала для всех ваших задач.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Сервис</h4>
+      <a href="#about">О нас</a>
+      <a href="#how">Как работает</a>
+      <a href="#directions">Направления</a>
+      <a href="#tariffs">Тарифы</a>
+    </div>
+    <div class="footer-col">
+      <h4>Поддержка</h4>
+      <a href="https://t.me/hipervpn_bot">Telegram-бот</a>
+      <a href="#faq">FAQ</a>
+      <a href="#">Статус серверов</a>
+      <a href="#">Связаться</a>
+    </div>
+    <div class="footer-col">
+      <h4>Правовая</h4>
+      <a href="#">Условия использования</a>
+      <a href="#">Политика конфиденциальности</a>
+      <a href="#">Политика возвратов</a>
+      <a href="#">Cookie</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 HiperVPN. Все права защищены.</span>
+    <div class="footer-legal">
+      <a href="#">Условия использования</a>
+      <a href="#">Конфиденциальность</a>
+      <a href="#">support@hipervpn.io</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+function toggleFaq(btn) {
+  const item = btn.parentElement;
+  const ans = item.querySelector('.faq-a');
+  const isOpen = btn.classList.contains('open');
+  document.querySelectorAll('.faq-q.open').forEach(q => {
+    q.classList.remove('open');
+    q.parentElement.querySelector('.faq-a').classList.remove('open');
+  });
+  if (!isOpen) {
+    btn.classList.add('open');
+    ans.classList.add('open');
+  }
+}
+</script>
+</body>
+</html>
